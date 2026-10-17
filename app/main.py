@@ -22,6 +22,7 @@ def preco_com_desconto(preco: float, pct: float) -> float:
 class CafeIn(BaseModel):
     nome: str = Field(min_length=1, max_length=80)
     preco: float = Field(gt=0, lt=10000)
+    origem: str | None = Field(default=None, max_length=80)
 
 
 class CafeOut(BaseModel):
@@ -29,6 +30,7 @@ class CafeOut(BaseModel):
     id: int
     nome: str
     preco: float
+    origem: str | None = None
 
 
 @app.get("/health")
@@ -48,7 +50,7 @@ def listar_cafes(db: Session = Depends(get_db)):
 
 @app.post("/cafes", response_model=CafeOut, status_code=201)
 def criar_cafe(dados: CafeIn, db: Session = Depends(get_db)):
-    cafe = Cafe(nome=dados.nome, preco=dados.preco)
+    cafe = Cafe(nome=dados.nome, preco=dados.preco, origem=dados.origem)
     db.add(cafe)
     try:
         db.commit()
