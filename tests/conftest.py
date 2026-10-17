@@ -3,12 +3,12 @@ import os
 # testes usam sempre um sqlite local, nunca o banco de staging ou produção
 os.environ["DATABASE_URL"] = "sqlite:///./test.db"
 
-import pytest  # noqa: E402
-from fastapi.testclient import TestClient  # noqa: E402
+import pytest
+from fastapi.testclient import TestClient
 
-from app.db import engine  # noqa: E402
-from app.main import app  # noqa: E402
-from app.models import Base  # noqa: E402
+from app.db import engine
+from app.main import app
+from app.models import Base
 
 
 @pytest.fixture(autouse=True)

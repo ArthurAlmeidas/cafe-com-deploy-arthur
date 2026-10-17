@@ -1,4 +1,5 @@
 import os
+from typing import Annotated
 
 from fastapi import Depends, FastAPI, HTTPException, Query
 from pydantic import BaseModel, ConfigDict, Field
@@ -11,6 +12,8 @@ from app.models import Cafe
 
 app = FastAPI(title="Café com Deploy")
 
+DbSession = Annotated[Session, Depends(get_db)]
+
 
 def preco_com_desconto(preco: float, pct: float) -> float:
     maximo = float(os.getenv("DESCONTO_MAXIMO", "50"))
@@ -22,7 +25,7 @@ def preco_com_desconto(preco: float, pct: float) -> float:
 class CafeIn(BaseModel):
     nome: str = Field(min_length=1, max_length=80)
     preco: float = Field(gt=0, lt=10000)
-    origem: str | None = Field(default=None, max_length=80)
+    origem: str = Field(default="Não informada", max_length=60)
 
 
 class CafeOut(BaseModel):
@@ -30,7 +33,7 @@ class CafeOut(BaseModel):
     id: int
     nome: str
     preco: float
-    origem: str | None = None
+    origem: str
 
 
 @app.get("/health")
@@ -44,12 +47,12 @@ def version():
 
 
 @app.get("/cafes", response_model=list[CafeOut])
-def listar_cafes(db: Session = Depends(get_db)):
+def listar_cafes(db: DbSession):
     return db.scalars(select(Cafe).order_by(Cafe.id)).all()
 
 
 @app.post("/cafes", response_model=CafeOut, status_code=201)
-def criar_cafe(dados: CafeIn, db: Session = Depends(get_db)):
+def criar_cafe(dados: CafeIn, db: DbSession):
     cafe = Cafe(nome=dados.nome, preco=dados.preco, origem=dados.origem)
     db.add(cafe)
     try:
@@ -62,7 +65,7 @@ def criar_cafe(dados: CafeIn, db: Session = Depends(get_db)):
 
 
 @app.get("/cafes/{cafe_id}", response_model=CafeOut)
-def obter_cafe(cafe_id: int, db: Session = Depends(get_db)):
+def obter_cafe(cafe_id: int, db: DbSession):
     cafe = db.get(Cafe, cafe_id)
     if cafe is None:
         raise HTTPException(status_code=404, detail="café não encontrado")
@@ -72,8 +75,8 @@ def obter_cafe(cafe_id: int, db: Session = Depends(get_db)):
 @app.get("/cafes/{cafe_id}/preco")
 def preco_do_cafe(
     cafe_id: int,
+    db: DbSession,
     desconto: float = Query(default=0),
-    db: Session = Depends(get_db),
 ):
     cafe = db.get(Cafe, cafe_id)
     if cafe is None:
