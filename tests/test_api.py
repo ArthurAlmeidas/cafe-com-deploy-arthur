@@ -54,3 +54,11 @@ def test_desconto_de_80_por_cento_e_rejeitado(client):
     cafe_id = client.post("/cafes", json={"nome": "Sul de Minas", "preco": 10}).json()["id"]
     resposta = client.get(f"/cafes/{cafe_id}/preco?desconto=80")
     assert resposta.status_code == 422
+
+
+def test_criar_cafe_com_origem(client):
+    criado = client.post(
+        "/cafes", json={"nome": "Chapada", "preco": 15.0, "origem": "Bahia"}
+    )
+    assert criado.status_code == 201
+    assert criado.json()["origem"] == "Bahia"
