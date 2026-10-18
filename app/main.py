@@ -33,7 +33,7 @@ class CafeOut(BaseModel):
     id: int
     nome: str
     preco: float
-    origem: str
+    origem: str | None = None
 
 
 @app.get("/health")
