@@ -16,7 +16,7 @@ DbSession = Annotated[Session, Depends(get_db)]
 
 
 def preco_com_desconto(preco: float, pct: float) -> float:
-    maximo = float(os.getenv("DESCONTO_MAXIMO", "90"))
+    maximo = float(os.getenv("DESCONTO_MAXIMO", "50"))
     if not 0 <= pct <= maximo:
         raise ValueError("desconto inválido")
     return round(preco * (1 - pct / 100), 2)
