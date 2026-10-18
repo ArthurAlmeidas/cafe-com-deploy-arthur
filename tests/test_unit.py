@@ -28,3 +28,6 @@ def test_desconto_negativo():
 def test_maximo_configuravel_por_variavel_de_ambiente(monkeypatch):
     monkeypatch.setenv("DESCONTO_MAXIMO", "90")
     assert preco_com_desconto(10.0, 80) == 2.0
+
+def test_desconto_zero_mantem_preco():
+    assert preco_com_desconto(7.0, 0) == 7.0
